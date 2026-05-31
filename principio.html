@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Universo Visual & Bitácora</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ==========================================================================
+           VARIABLES DE DISEÑO (Editá esto para personalizar tus colores artísticos)
+           ========================================================================== */
+        :root {
+            --bg-principal: #0f0f11;
+            --bg-sidebar: #16161a;
+            --bg-card: #1f1f24;
+            --texto-principal: #f5f5f7;
+            --texto-secundario: #94a3b8;
+            --acento: #a855f7; /* Morado artístico */
+            --acento-hover: #c084fc;
+            --font-main: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --radius: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: var(--font-main);
+        }
+
+        body {
+            background-color: var(--bg-principal);
+            color: var(--texto-principal);
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ==========================================================================
+           SIDEBAR (Barra Lateral)
+           ========================================================================== */
+        aside {
+            width: 280px;
+            background-color: var(--bg-sidebar);
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            border-right: 1px solid #27272a;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: var(--acento);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-item {
+            padding: 0.8rem 1rem;
+            border-radius: var(--radius);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            color: var(--texto-secundario);
+            transition: all 0.3s ease;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background-color: var(--bg-card);
+            color: var(--texto-principal);
+        }
+
+        .nav-item.active {
+            border-left: 4px solid var(--acento);
+        }
+
+        /* ==========================================================================
+           CONTENEDOR PRINCIPAL
+           ========================================================================== */
+        main {
+            margin-left: 280px;
+            flex-grow: 1;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .btn-add {
+            background-color: var(--acento);
+            color: white;
+            border: none;
+            padding: 0.7rem 1.2rem;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-add:hover {
+            background-color: var(--acento-hover);
+        }
+
+        /* ==========================================================================
+           PINTEREST MASONRY GRID (Moodboard)
+           ========================================================================== */
+        .masonry-grid {
+            column-count: 4;
+            column-gap: 1.2rem;
+            width: 100%;
+        }
+
+        @media (max-width: 1200px) { .masonry-grid { column-count: 3; } }
+        @media (max-width: 900px) { .masonry-grid { column-count: 2; } }
+        @media (max-width: 600px) { .masonry-grid { column-count: 1; } }
+
+        .pin {
+            background-color: var(--bg-card);
+            break-inside: avoid;
+            margin-bottom: 1.2rem;
+            border-radius: var(--radius);
+            overflow: hidden;
+            position: relative;
+            transition: transform 0.3s ease;
+            border: 1px solid #27272a;
+        }
+
+        .pin:hover {
+            transform: scale(1.02);
+        }
+
+        .pin img, .pin video {
+            width: 100%;
+            display: block;
+            height: auto;
+        }
+
+        .pin-info {
+            padding: 1rem;
+        }
+
+        .pin-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .pin-desc {
+            font-size: 0.85rem;
+            color: var(--texto-secundario);
+        }
+
+        .pin-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: var(--acento);
+            text-decoration: none;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: #ef4444;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .pin:hover .delete-btn, .pdf-card:hover .delete-btn, .blog-card:hover .delete-btn {
+            opacity: 1;
+        }
+
+        /* ==========================================================================
+           SECCIÓN PDF
+           ========================================================================== */
+        .pdf-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .pdf-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            overflow: hidden;
+            position: relative;
+            border: 1px solid #27272a;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pdf-cover {
+            width: 100%;
+            height: 280px;
+            background: #27272a;
+            object-fit: cover;
+        }
+
+        .pdf-details {
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            flex-grow: 1;
+        }
+
+        .pdf-btn {
+            background: #27272a;
+            color: white;
+            text-align: center;
+            padding: 0.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-top: auto;
+            transition: background 0.2s;
+        }
+
+        .pdf-btn:hover { background: var(--acento); }
+
+        /* ==========================================================================
+           SECCIÓN BLOG (Reflexiones)
+           ========================================================================== */
+        .blog-container {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .blog-card {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: var(--radius);
+            border: 1px solid #27272a;
+            position: relative;
+        }
+
+        .blog-date {
+            font-size: 0.8rem;
+            color: var(--acento);
+            margin-bottom: 0.5rem;
+        }
+
+        .blog-content {
+            margin-top: 1rem;
+            color: #cbd5e1;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        /* ==========================================================================
+           MODALES / FORMULARIOS FLOATING
+           ========================================================================== */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal {
+            background: var(--bg-sidebar);
+            padding: 2rem;
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid #27272a;
+        }
+
+        .modal-title { margin-bottom: 1.5rem; }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label { font-size: 0.9rem; color: var(--texto-secundario); }
+
+        .form-group input, .form-group textarea, .form-group select {
+            background: var(--bg-principal);
+            border: 1px solid #27272a;
+            padding: 0.75rem;
+            border-radius: 8px;
+            color: white;
+            outline: none;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            border-color: var(--acento);
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn-cancel {
+            background: transparent;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <aside>
+        <div class="logo">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span>Mi Espacio</span>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item active" onclick="switchTab('moodboard')">
+                <i class="fa-solid fa-compass"></i> Moodboard
+            </li>
+            <li class="nav-item" onclick="switchTab('pdfs')">
+                <i class="fa-solid fa-book"></i> Biblioteca PDF
+            </li>
+            <li class="nav-item" onclick="switchTab('blog')">
+                <i class="fa-solid fa-feather"></i> Bitácora
+            </li>
+        </ul>
+    </aside>
+
+    <main>
+        
+        <section id="moodboard" class="section active">
+            <div class="section-header">
+                <h2>Inspiración Visual</h2>
+                <button class="btn-add" onclick="openModal('modal-pin')"><i class="fa-solid fa-plus"></i> Añadir Pin</button>
+            </div>
+            <div class="masonry-grid" id="pin-container">
+                </div>
+        </section>
+
+        <section id="pdfs" class="section">
+            <div class="section-header">
+                <h2>Documentos y Lecturas</h2>
+                <button class="btn-add" onclick="openModal('modal-pdf')"><i class="fa-solid fa-upload"></i> Subir PDF</button>
+            </div>
+            <div class="pdf-grid" id="pdf-container">
+                </div>
+        </section>
+
+        <section id="blog" class="section">
+            <div class="section-header">
+                <h2>Reflexiones & Pensamientos</h2>
+                <button class="btn-add" onclick="openModal('modal-blog')"><i class="fa-solid fa-pen"></i> Nueva Entrada</button>
+            </div>
+            <div class="blog-container" id="blog-container">
+                </div>
+        </section>
+
+    </main>
+
+    <div class="modal-overlay" id="modal-pin">
+        <div class="modal">
+            <h3 class="modal-title">Nuevo Pin</h3>
+            <div class="form-group">
+                <label>Tipo de Contenido</label>
+                <select id="pin-type" onchange="togglePinInputType()">
+                    <option value="url">Enlace / URL de Imagen o Video</option>
+                    <option value="file">Subir Archivo Local</option>
+                </select>
+            </div>
+            <div class="form-group" id="pin-url-group">
+                <label>URL del medio (Imagen/Video)</label>
+                <input type="text" id="pin-url" placeholder="https://ejemplo.com/imagen.jpg">
+            </div>
+            <div class="form-group" id="pin-file-group" style="display:none;">
+                <label>Seleccionar Archivo</label>
+                <input type="file" id="pin-file" accept="image/*,video/*">
+            </div>
+            <div class="form-group">
+                <label>Título</label>
+                <input type="text" id="pin-title" placeholder="Título opcional">
+            </div>
+            <div class="form-group">
+                <label>Descripción / Enlace de interés</label>
+                <input type="text" id="pin-desc" placeholder="Link de referencia o nota...">
+            </div>
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeModal('modal-pin')">Cancelar</button>
+                <button class="btn-add" onclick="savePin()">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-pdf">
+        <div class="modal">
+            <h3 class="modal-title">Subir Documento PDF</h3>
+            <div class="form-group">
+                <label>Título del PDF</label>
+                <input type="text" id="pdf-title" required placeholder="Ej: Anatomía de la Creatividad">
+            </div>
+            <div class="form-group">
+                <label>URL de Portada (Imagen)</label>
+                <input type="text" id="pdf-cover" placeholder="https://ejemplo.com/portada.jpg (Opcional)">
+            </div>
+            <div class="form-group">
+                <label>Archivo PDF (Link o Carga rápida)</label>
+                <input type="text" id="pdf-link" placeholder="Link de Google Drive / Dropbox o data URL">
+            </div>
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeModal('modal-pdf')">Cancelar</button>
+                <button class="btn-add" onclick="savePdf()">Añadir</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-blog">
+        <div class="modal">
+            <h3 class="modal-title">Escribir Reflexión</h3>
+            <div class="form-group">
+                <label>Título</label>
+                <input type="text" id="blog-title" required placeholder="¿Qué hay en tu mente hoy?">
+            </div>
+            <div class="form-group">
+                <label>Contenido</label>
+                <textarea id="blog-content" rows="6" placeholder="Escribí acá con total libertad..."></textarea>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeModal('modal-blog')">Cancelar</button>
+                <button class="btn-add" onclick="saveBlog()">Publicar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Inicializar datos si no existen en localStorage
+        if(!localStorage.getItem('pins')) localStorage.setItem('pins', JSON.stringify([]));
+        if(!localStorage.getItem('pdfs')) localStorage.setItem('pdfs', JSON.stringify([]));
+        if(!localStorage.getItem('blogs')) localStorage.setItem('blogs', JSON.stringify([]));
+
+        // Navegación de Pestañas
+        function switchTab(tabId) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        // Control de Modales
+        function openModal(id) { document.getElementById(id).classList.add('open'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+        
+        function togglePinInputType() {
+            const type = document.getElementById('pin-type').value;
+            document.getElementById('pin-url-group').style.display = type === 'url' ? 'flex' : 'none';
+            document.getElementById('pin-file-group').style.display = type === 'file' ? 'flex' : 'none';
+        }
+
+        // --- LÓGICA DE PINES (Moodboard) ---
+        function renderPins() {
+            const pins = JSON.parse(localStorage.getItem('pins'));
+            const container = document.getElementById('pin-container');
+            container.innerHTML = '';
+            
+            pins.forEach((pin, index) => {
+                const isVideo = pin.src.includes('video') || pin.src.match(/\.(mp4|webm|ogg)/i) || pin.src.startsWith('data:video');
+                const mediaHtml = isVideo 
+                    ? `<video src="${pin.src}" autoplay muted loop playsinline></video>`
+                    : `<img src="${pin.src}" alt="${pin.title}" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500'">`;
+
+                const pinHtml = `
+                    <div class="pin">
+                        <button class="delete-btn" onclick="deleteItem('pins', ${index}, renderPins)"><i class="fa-solid fa-trash"></i></button>
+                        ${mediaHtml}
+                        <div class="pin-info">
+                            ${pin.title ? `<div class="pin-title">${pin.title}</div>` : ''}
+                            ${pin.desc ? `<div class="pin-desc">${pin.desc}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += pinHtml;
+            });
+        }
+
+        function savePin() {
+            const type = document.getElementById('pin-type').value;
+            const title = document.getElementById('pin-title').value;
+            const desc = document.getElementById('pin-desc').value;
+            
+            if(type === 'url') {
+                const src = document.getElementById('pin-url').value;
+                if(!src) return;
+                pushData('pins', {src, title, desc});
+                resetAndClosePin();
+            } else {
+                const file = document.getElementById('pin-file').files[0];
+                if(!file) return;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    pushData('pins', {src: e.target.result, title, desc});
+                    resetAndClosePin();
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function resetAndClosePin() {
+            document.getElementById('pin-url').value = '';
+            document.getElementById('pin-file').value = '';
+            document.getElementById('pin-title').value = '';
+            document.getElementById('pin-desc').value = '';
+            closeModal('modal-pin');
+            renderPins();
+        }
+
+        // --- LÓGICA DE PDFS ---
+        function renderPdfs() {
+            const pdfs = JSON.parse(localStorage.getItem('pdfs'));
+            const container = document.getElementById('pdf-container');
+            container.innerHTML = '';
+
+            pdfs.forEach((pdf, index) => {
+                const cover = pdf.cover || 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400';
+                const pdfHtml = `
+                    <div class="pdf-card">
+                        <button class="delete-btn" onclick="deleteItem('pdfs', ${index}, renderPdfs)"><i class="fa-solid fa-trash"></i></button>
+                        <img class="pdf-cover" src="${cover}">
+                        <div class="pdf-details">
+                            <div class="pin-title">${pdf.title}</div>
+                            <a href="${pdf.link}" target="_blank" class="pdf-btn"><i class="fa-solid fa-eye"></i> Leer PDF</a>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += pdfHtml;
+            });
+        }
+
+        function savePdf() {
+            const title = document.getElementById('pdf-title').value;
+            const cover = document.getElementById('pdf-cover').value;
+            const link = document.getElementById('pdf-link').value;
+            
+            if(!title || !link) return alert('El título y el link del PDF son obligatorios');
+            
+            pushData('pdfs', {title, cover, link});
+            document.getElementById('pdf-title').value = '';
+            document.getElementById('pdf-cover').value = '';
+            document.getElementById('pdf-link').value = '';
+            closeModal('modal-pdf');
+            renderPdfs();
+        }
+
+        // --- LÓGICA DE BLOG (Bitácora) ---
+        function renderBlogs() {
+            const blogs = JSON.parse(localStorage.getItem('blogs'));
+            const container = document.getElementById('blog-container');
+            container.innerHTML = '';
+
+            blogs.sort((a,b) => b.id - a.id).forEach((post, originalIndex) => {
+                // Como invertimos el orden para ver los nuevos primero, buscamos su índice real
+                const realIndex = blogs.findIndex(b => b.id === post.id);
+                const blogHtml = `
+                    <div class="blog-card">
+                        <button class="delete-btn" onclick="deleteItem('blogs', ${realIndex}, renderBlogs)"><i class="fa-solid fa-trash"></i></button>
+                        <div class="blog-date">${post.date}</div>
+                        <h3>${post.title}</h3>
+                        <div class="blog-content">${post.content}</div>
+                    </div>
+                `;
+                container.innerHTML += blogHtml;
+            });
+        }
+
+        function saveBlog() {
+            const title = document.getElementById('blog-title').value;
+            const content = document.getElementById('blog-content').value;
+            
+            if(!title || !content) return;
+
+            const date = new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute:'2-digit' });
+            pushData('blogs', {id: Date.now(), title, content, date});
+            
+            document.getElementById('blog-title').value = '';
+            document.getElementById('blog-content').value = '';
+            closeModal('modal-blog');
+            renderBlogs();
+        }
+
+        // --- REPOSITORIO DE FUNCIONES AUXILIARES ---
+        function pushData(key, obj) {
+            const data = JSON.parse(localStorage.getItem(key));
+            data.push(obj);
+            localStorage.setItem(key, JSON.stringify(data));
+        }
+
+        function deleteItem(key, index, callback) {
+            if(confirm('¿Seguro que querés borrar este elemento de tu espacio?')) {
+                const data = JSON.parse(localStorage.getItem(key));
+                data.splice(index, 1);
+                localStorage.setItem(key, JSON.stringify(data));
+                callback();
+            }
+        }
+
+        // Carga Inicial
+        window.onload = function() {
+            renderPins();
+            renderPdfs();
+            renderBlogs();
+        }
+    </script>
+</body>
+</html>
